@@ -25,7 +25,15 @@ module.exports = {
     },
 
   },
+  etherscan: {
 
+    apiKey: {
+
+        sepolia: process.env.ETHEREUM_SCAN_API_KEY,
+
+    },
+
+  },
   solidity: "0.8.27",
 
 };

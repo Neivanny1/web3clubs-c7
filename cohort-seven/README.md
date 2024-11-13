@@ -9,5 +9,9 @@ npx hardhat help
 npx hardhat test
 REPORT_GAS=true npx hardhat test
 npx hardhat node
-npx hardhat ignition deploy ./ignition/modules/Lock.js
+npx hardhat ignition deploy ./ignition/modules/Lock.js --network sepolia 
+## or ##
+npx hardhat run ignition/deploy.js --network sepolia // ethereum
+
+npx hardhat verify --network sepolia 0x19c2A74b83750218efD1445e56C711c01155E273
 ```
