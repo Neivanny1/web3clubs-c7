@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.2;
-import "./BookStore.sol";
+
 // Book Store - we have an owner
 // Books - cat_name, price, author, title, isbn, available
 // - string, uint, int, bool
