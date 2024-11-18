@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.2;
-
+import "./BookStore.sol";
 // Book Store - we have an owner
 // Books - cat_name, price, author, title, isbn, available
 // - string, uint, int, bool
@@ -12,14 +12,23 @@ pragma solidity ^0.8.2;
 // array - two type - dynamic, fixed size unit256[] and unit256[4]
 // event - notify about new addition or act as audit trail
 // variables - global, state, local
-
+// ASSIGMENTS
 // functions - setters and getters
 // addBooks() - event BookAdded setter - setting data
 // getBook() - getter - getting data
 // buyBook() - event
 // getTotalBooks() -
+// cretae a loyaltyProgram - contract for BookStore two functions
+    // addpoints to user address
+    // get userpoints
+// use openzepplin contract for ownable
+// Create a discount contract - 2 functions
+    // Set discount (either fixed or percentage)
+        // if percentage use points to get discount percentage
+    // Get discount price
 
 // inheritance - 
+/*
 // Parrent Contract
 contract A {
     function findA() public pure virtual returns (string memory) {
@@ -33,7 +42,7 @@ contract B is A {
         return "Contract B";
     }
 }
-
+*/
 
 contract BookStore {
 
