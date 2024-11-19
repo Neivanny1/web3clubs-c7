@@ -1,22 +1,39 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import "./BookStore.sol";
+import "./LoyaltyProgram.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+
 contract Discount is Ownable {
-    enum DiscountType { NONE, FIXED, PERCENTAGE }
-
-    struct DiscountDetails {
-        DiscountType discountType;
-        uint256 value; // For FIXED, this is the fixed discount amount. For PERCENTAGE, this is the maximum percentage discount (e.g., 20 for up to 20%).
-    }
-
-    DiscountDetails public discountDetails;
+    BookStore public bookStore;
     LoyaltyProgram public loyaltyProgram;
 
-    event DiscountSet(DiscountType discountType, uint256 value);
+    /**
+     * @notice Initializes the contract with the owner, BookStore, and LoyaltyProgram addresses.
+     * @param initialOwner The address of the contract owner
+     * @param _bookStore The address of the BookStore contract
+     * @param _loyaltyProgram The address of the LoyaltyProgram contract
+     */
+    constructor(
+        address initialOwner,
+        address _bookStore,
+        address _loyaltyProgram
+    ) Ownable(initialOwner) {
+        bookStore = BookStore(_bookStore);
+        loyaltyProgram = LoyaltyProgram(_loyaltyProgram);
+    }
 
     /**
-     * @notice Sets the loyalty program contract
+     * @notice Sets the BookStore contract
+     * @param _bookStore Address of the BookStore contract
+     */
+    function setBookStore(address _bookStore) public onlyOwner {
+        bookStore = BookStore(_bookStore);
+    }
+
+    /**
+     * @notice Sets the LoyaltyProgram contract
      * @param _loyaltyProgram Address of the LoyaltyProgram contract
      */
     function setLoyaltyProgram(address _loyaltyProgram) public onlyOwner {
@@ -24,51 +41,27 @@ contract Discount is Ownable {
     }
 
     /**
-     * @notice Sets a discount (either fixed or percentage)
-     * @param _discountType The type of discount (0: NONE, 1: FIXED, 2: PERCENTAGE)
-     * @param _value The discount value (fixed amount or maximum percentage)
+     * @notice Gets the discounted price for a book based on user points
+     * @param _bookId The ID of the book
+     * @param _user The address of the user
+     * @return The discounted price of the book
      */
-    function setDiscount(DiscountType _discountType, uint256 _value) public onlyOwner {
-        require(
-            _discountType == DiscountType.NONE || _value > 0,
-            "Invalid discount value."
-        );
-        if (_discountType == DiscountType.PERCENTAGE) {
-            require(_value <= 100, "Percentage discount cannot exceed 100.");
-        }
-
-        discountDetails = DiscountDetails({
-            discountType: _discountType,
-            value: _value
-        });
-
-        emit DiscountSet(_discountType, _value);
-    }
-
-    /**
-     * @notice Gets the discounted price based on the set discount and user points from the loyalty program
-     * @param _originalPrice The original price of the item
-     * @param _user Address of the user
-     * @return The discounted price
-     */
-    function getDiscountedPrice(uint256 _originalPrice, address _user)
+    function getDiscountedPrice(uint256 _bookId, address _user)
         public
         view
         returns (uint256)
     {
-        if (discountDetails.discountType == DiscountType.NONE) {
-            return _originalPrice;
-        } else if (discountDetails.discountType == DiscountType.FIXED) {
-            return _originalPrice > discountDetails.value
-                ? _originalPrice - discountDetails.value
-                : 0;
-        } else if (discountDetails.discountType == DiscountType.PERCENTAGE) {
-            uint256 userPoints = loyaltyProgram.getUserPoints(_user);
-            uint256 percentageDiscount = userPoints > discountDetails.value
-                ? discountDetails.value
-                : userPoints; // Points cap discount
-            return _originalPrice - (_originalPrice * percentageDiscount / 100);
-        }
-        return _originalPrice;
+        // Fetch the original price from the BookStore
+        (, , uint256 originalPrice, , ) = bookStore.getBook(_bookId);
+
+        // Fetch the user's points from the LoyaltyProgram
+        uint256 userPoints = loyaltyProgram.getUserPoints(_user);
+
+        // Calculate percentage discount (points capped at 100%)
+        uint256 percentageDiscount = userPoints > 100 ? 100 : userPoints;
+        uint256 discountAmount = (originalPrice * percentageDiscount) / 100;
+
+        // Calculate and return the discounted price
+        return originalPrice - discountAmount;
     }
 }
