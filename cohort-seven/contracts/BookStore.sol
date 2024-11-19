@@ -1,24 +1,9 @@
-// SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.2;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-// ASSIGMENTS
-// functions - setters and getters
-// addBooks() - event BookAdded setter - setting data
-// getBook() - getter - getting data
-// buyBook() - event
-// getTotalBooks() -
-// cretae a loyaltyProgram - contract for BookStore two functions
-    // addpoints to user address
-    // get userpoints
-// use openzepplin contract for ownable
-// Create a discount contract - 2 functions
-    // Set discount (either fixed or percentage)
-        // if percentage use points to get discount percentage
-    // Get discount price
-contract BookStore {
-    address public owner;
-
+contract BookStore is Ownable {
     struct Book {
         string title;
         string author;
@@ -33,9 +18,8 @@ contract BookStore {
     event BookAdded(uint256 bookId, string title, string author, uint256 price, uint256 stock);
     event BookPurchased(uint256 bookId, address buyer, uint256 quantity);
 
-    constructor() {
-        owner = msg.sender;
-    }
+    // Pass the owner address to the Ownable constructor
+    constructor(address initialOwner) Ownable(initialOwner) {}
 
     function addBook(
         uint256 _bookId,
@@ -76,7 +60,8 @@ contract BookStore {
             book.isAvailable = false;
         }
 
-        payable(owner).transfer(msg.value);
+        // Use the inherited `owner()` function to get the owner's address
+        payable(owner()).transfer(msg.value);
         emit BookPurchased(_bookId, msg.sender, _quantity);
     }
 }
