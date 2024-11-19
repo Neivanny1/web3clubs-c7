@@ -9,7 +9,7 @@ contract LoyaltyProgram is Ownable {
 
     event PointsAdded(address indexed user, uint256 points);
     event PointsRedeemed(address indexed user, uint256 points);
-        // Pass the owner address to the Ownable constructor
+    // Pass the owner address to the Ownable constructor
     constructor(address initialOwner) Ownable(initialOwner) {}
     /**
      * @notice Adds points to a user's account
