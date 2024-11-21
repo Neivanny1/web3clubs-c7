@@ -40,6 +40,7 @@ contract BookStore is Ownable {
         emit BookAdded(_bookId, _title, _author, _price, _stock);
     }
 
+    // Gets a book based on book id
     function getBook(uint256 _bookId)
         public
         view
@@ -49,6 +50,16 @@ contract BookStore is Ownable {
         return (book.title, book.author, book.price, book.stock, book.isAvailable);
     }
 
+    // Function to get all books available
+    function getAllBooks() public view returns (Book[] memory) {
+        Book[] memory allBooks = new Book[](bookIds.length);
+        for (uint256 i = 0; i < bookIds.length; i++) {
+            allBooks[i] = books[bookIds[i]];
+        }
+        return allBooks;
+    }
+
+    // Function to buy a book
     function buyBook(uint256 _bookId, uint256 _quantity) public payable {
         Book storage book = books[_bookId];
         require(book.isAvailable, "This book is not available.");
