@@ -14,17 +14,22 @@ contract BookStore is Ownable {
 
     mapping(uint256 => Book) public books;
     uint256[] public bookIds;
+    // List of subscribers
     address[] public subscriberList;
+    // Mapping to track whether an address is already subscribed
+    mapping(address => bool) private isSubscribed;
 
     event BookAdded(uint256 indexed bookId, string title, string author, uint256 price, uint256 stock);
     event PurchaseIntiated(uint256 indexed bookId, address indexed buyer, address indexed seller,  uint256 quantity);  // add a seller address for the event
     event PurchaseConfirmed(uint256 indexed bookId, address indexed buyer, address indexed seller, uint256 quantity); // add a seller address
-    event SubscriptionAdded(address indexed subscriber);          // complete on this two 
+    event SubscriptionAdded(address indexed subscriber);
     event SubscriptionRemoved(address indexed subscriber);
+    event AllBooksRemoved();
+    event BookRemoved(uint256 _bookId);
 
     // Pass the owner address to the Ownable constructor
     constructor(address initialOwner) Ownable(initialOwner) {}
-
+    // adding books to stock
     function addBook(
         uint256 _bookId,
         string memory _title,
@@ -89,5 +94,63 @@ contract BookStore is Ownable {
         }
 
         emit PurchaseConfirmed(_bookId, msg.sender, owner(), _quantity);
+    }
+    // Remove book with bookId
+    function removeBook(uint256 _bookId) public onlyOwner {
+        require(books[_bookId].price != 0, "Book does not exist.");
+        // Remove the book
+        delete books[_bookId];
+        // Remove the ID from the `bookIds` array
+        for (uint256 i = 0; i < bookIds.length; i++) {
+            if (bookIds[i] == _bookId) {
+                bookIds[i] = bookIds[bookIds.length - 1]; // Replace with the last ID
+                bookIds.pop(); // Remove the last element
+                break;
+            }
+        }
+        emit BookRemoved(_bookId);
+    }
+
+    // Removes all books from the store
+    function removeAllBooks() public onlyOwner {
+        for (uint256 i = 0; i < bookIds.length; i++) {
+            uint256 bookId = bookIds[i];
+            delete books[bookId];
+        }
+        // Clear the bookIds array
+        delete bookIds;
+        emit AllBooksRemoved();
+    }
+    // Add subscriptions
+    function addSubscription(address _subscriber) public onlyOwner {
+        require(!isSubscribed[_subscriber], "Address is already subscribed.");
+        subscriberList.push(_subscriber);
+        isSubscribed[_subscriber] = true;
+        emit SubscriptionAdded(_subscriber);
+    }
+
+    // Removes a subscriber from the list
+    function removeSubscription(address _subscriber) public onlyOwner {
+        require(isSubscribed[_subscriber], "Address is not subscribed.");
+        // Remove the subscriber from the list
+        for (uint256 i = 0; i < subscriberList.length; i++) {
+            if (subscriberList[i] == _subscriber) {
+                subscriberList[i] = subscriberList[subscriberList.length - 1];
+                subscriberList.pop();
+                break;
+            }
+        }
+        isSubscribed[_subscriber] = false;
+        emit SubscriptionRemoved(_subscriber);
+    }
+
+    // Gets the total number of subscribers
+    function getSubscriberCount() public view returns (uint256) {
+        return subscriberList.length;
+    }
+
+    // Checks if an address is subscribed
+    function isSubscriber(address _subscriber) public view returns (bool) {
+        return isSubscribed[_subscriber];
     }
 }
