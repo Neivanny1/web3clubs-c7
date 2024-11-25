@@ -75,6 +75,6 @@ const createEthereumAccount = () => {
 
 (async () => {
     await createEthereumAccount()
-    // await addBookToContract(3, "Harry Potter", "J.K. Rowling", 10, 100)
-    // await getBook()
+    await addBookToContract(3, "Harry Potter", "J.K. Rowling", 10, 100)
+    await getBook()
 })()
