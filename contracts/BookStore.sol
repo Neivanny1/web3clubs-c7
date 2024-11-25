@@ -96,7 +96,7 @@ contract BookStore is Ownable {
         emit PurchaseConfirmed(_bookId, msg.sender, owner(), _quantity);
     }
     // Remove book with bookId
-    function removeBook(uint256 _bookId) public onlyOwner {
+    function removeBook(uint256 _bookId) public onlyOwner virtual {
         require(books[_bookId].price != 0, "Book does not exist.");
         // Remove the book
         delete books[_bookId];

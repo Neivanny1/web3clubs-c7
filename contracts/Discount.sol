@@ -9,12 +9,7 @@ contract Discount is Ownable {
     BookStore public bookStore;
     LoyaltyProgram public loyaltyProgram;
 
-    /**
-     * @notice Initializes the contract with the owner, BookStore, and LoyaltyProgram addresses.
-     * @param initialOwner The address of the contract owner
-     * @param _bookStore The address of the BookStore contract
-     * @param _loyaltyProgram The address of the LoyaltyProgram contract
-     */
+    // Initializes the contract with the owner, BookStore, and LoyaltyProgram addresses.
     constructor(
         address initialOwner,
         address _bookStore,
@@ -24,28 +19,17 @@ contract Discount is Ownable {
         loyaltyProgram = LoyaltyProgram(_loyaltyProgram);
     }
 
-    /**
-     * @notice Sets the BookStore contract
-     * @param _bookStore Address of the BookStore contract
-     */
+    // Sets the BookStore contract
     function setBookStore(address _bookStore) public onlyOwner {
         bookStore = BookStore(_bookStore);
     }
 
-    /**
-     * @notice Sets the LoyaltyProgram contract
-     * @param _loyaltyProgram Address of the LoyaltyProgram contract
-     */
+    // Sets the LoyaltyProgram contract
     function setLoyaltyProgram(address _loyaltyProgram) public onlyOwner {
         loyaltyProgram = LoyaltyProgram(_loyaltyProgram);
     }
 
-    /**
-     * @notice Gets the discounted price for a book based on user points
-     * @param _bookId The ID of the book
-     * @param _user The address of the user
-     * @return The discounted price of the book
-     */
+    // Gets the discounted price for a book based on user points
     function getDiscountedPrice(uint256 _bookId, address _user)
         public
         view
