@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+
 contract LoyaltyProgram is Ownable {
     // Mapping to store user points
     mapping(address => uint256) private userPoints;
