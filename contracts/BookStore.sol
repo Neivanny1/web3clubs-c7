@@ -14,17 +14,21 @@ contract BookStore is Ownable {
 
     mapping(uint256 => Book) public books;
     uint256[] public bookIds;
+    address[] public subscriberList;
 
-    event BookAdded(uint256 bookId, string title, string author, uint256 price, uint256 stock);
-    event BookPurchased(uint256 bookId, address buyer, uint256 quantity);
+    event BookAdded(uint256 indexed bookId, string title, string author, uint256 price, uint256 stock);
+    event PurchaseIntiated(uint256 indexed bookId, address indexed buyer, address indexed seller,  uint256 quantity);  // add a seller address for the event
+    event PurchaseConfirmed(uint256 indexed bookId, address indexed buyer, address indexed seller, uint256 quantity); // add a seller address
+    event SubscriptionAdded(address indexed subscriber);          // complete on this two 
+    event SubscriptionRemoved(address indexed subscriber);
 
     // Pass the owner address to the Ownable constructor
     constructor(address initialOwner) Ownable(initialOwner) {}
 
     function addBook(
         uint256 _bookId,
-        string calldata _title,
-        string calldata _author,
+        string memory _title,
+        string memory _author,
         uint256 _price,
         uint256 _stock
     ) public onlyOwner {
@@ -32,7 +36,7 @@ contract BookStore is Ownable {
         books[_bookId] = Book({
             title: _title,
             author: _author,
-            price: _price,
+            price: _price * 1 ether, // Proper conversion to make sure price is in wei
             stock: _stock,
             isAvailable: _stock > 0
         });
@@ -64,15 +68,26 @@ contract BookStore is Ownable {
         Book storage book = books[_bookId];
         require(book.isAvailable, "This book is not available.");
         require(book.stock >= _quantity, "Not enough stock available.");
-        require(msg.value == book.price * _quantity, "Incorrect payment amount.");
 
+        uint256 totalPrice = book.price * _quantity;
+        require(msg.value == totalPrice, "Incorrect payment amount.");
+        require(msg.value <= totalPrice, "Overpaid for book purchase.");
+
+        emit PurchaseIntiated(_bookId, msg.sender, owner(), _quantity);
+
+        // Transfer payment to the owner
+        payable(owner()).transfer(msg.value);
+    }
+    // Confirm purchase
+    function confirmPurchase(uint256 _bookId, uint256 _quantity) public onlyOwner {
+        Book storage book = books[_bookId];
+        require(book.stock >= _quantity, "Not enough stock to confirm purchase.");
+        
         book.stock -= _quantity;
         if (book.stock == 0) {
             book.isAvailable = false;
         }
 
-        // Use the inherited `owner()` function to get the owner's address
-        payable(owner()).transfer(msg.value);
-        emit BookPurchased(_bookId, msg.sender, _quantity);
+        emit PurchaseConfirmed(_bookId, msg.sender, owner(), _quantity);
     }
 }
