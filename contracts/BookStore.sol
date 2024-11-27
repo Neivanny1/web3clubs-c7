@@ -3,7 +3,6 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-
 contract BookStore is Ownable {
     struct Book {
         string title;
@@ -25,8 +24,6 @@ contract BookStore is Ownable {
     event PurchaseConfirmed(uint256 indexed bookId, address indexed buyer, address indexed seller, uint256 quantity); // add a seller address
     event SubscriptionAdded(address indexed subscriber);
     event SubscriptionRemoved(address indexed subscriber);
-    event AllBooksRemoved();
-    event BookRemoved(uint256 _bookId);
 
     // Pass the owner address to the Ownable constructor
     constructor(address initialOwner) Ownable(initialOwner) {}
@@ -95,32 +92,6 @@ contract BookStore is Ownable {
         }
 
         emit PurchaseConfirmed(_bookId, msg.sender, owner(), _quantity);
-    }
-    // Remove book with bookId
-    function removeBook(uint256 _bookId) public onlyOwner virtual {
-        require(books[_bookId].price != 0, "Book does not exist.");
-        // Remove the book
-        delete books[_bookId];
-        // Remove the ID from the `bookIds` array
-        for (uint256 i = 0; i < bookIds.length; i++) {
-            if (bookIds[i] == _bookId) {
-                bookIds[i] = bookIds[bookIds.length - 1]; // Replace with the last ID
-                bookIds.pop(); // Remove the last element
-                break;
-            }
-        }
-        emit BookRemoved(_bookId);
-    }
-
-    // Removes all books from the store
-    function removeAllBooks() public onlyOwner {
-        for (uint256 i = 0; i < bookIds.length; i++) {
-            uint256 bookId = bookIds[i];
-            delete books[bookId];
-        }
-        // Clear the bookIds array
-        delete bookIds;
-        emit AllBooksRemoved();
     }
     // Add subscriptions
     function addSubscription(address _subscriber) public onlyOwner {
