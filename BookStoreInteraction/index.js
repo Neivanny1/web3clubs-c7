@@ -1,24 +1,24 @@
-
-import { ethers, Wallet } from "ethers";
+import { ethers, Wallet, formatEther, toBigInt } from "ethers";
 import * as dotenv from 'dotenv';
 dotenv.config();
 import bookStore from "./ABI/BookStore.json" assert { type: 'json' };
 
-
+// - 7 functions - node.js - TypeScript
 const createContractInstanceOnEthereum = (contractAddress, contractAbi) => {
     const alchemyApiKey = process.env.ALCHEMY_API_KEY_SEPOLIA;
     const provider = new ethers.AlchemyProvider('sepolia', alchemyApiKey);
-    console.log("provider", provider)
+    console.log("provider==>", provider)
 
     const privateKey = process.env.WALLET_PRIVATE_KEY;
-    const wallet = new Wallet(privateKey, provider);
+    const wallet = new Wallet(privateKey, provider); // get wallet from private key
 
     const contract = new ethers.Contract(contractAddress, contractAbi, wallet);
+    console.log("contract==>", contract)
 
     return contract
 }
 
-const contractAddress = '0x0F9696E62ce7BF9fDCBa39FD3ad1cAE821E2458a'
+const contractAddress = '0x0F9696E62ce7BF9fDCBa39FD3ad1cAE821E2458a' // deployed sepolia
 const contractOnETH =  createContractInstanceOnEthereum(contractAddress, bookStore.abi)
 
 
@@ -30,12 +30,13 @@ const addBookToContract = async(bookId, title, author, price, stock) => {
         
     } catch (error) {
         console.error(error) 
+        throw error
     }
 }
 
 
 const bookDetails = {
-    bookId: 1,
+    bookId: 5,
     title: "Harry Potter",
     author: "J.K. Rowling",
     price: 10,
@@ -44,37 +45,38 @@ const bookDetails = {
 
 
 const _bookId = 1
-const getBook = async () => {
+const getBook = async (_bookId) => {
     try{
         const books = await contractOnETH.getBooks(_bookId)
-        console.log(books)
+
+        console.log(books[2])
     } catch (error) {
         console.error(error)
     }
 }
 
-// create public and private key
-const createEthereumAccount = () => {
+const buyBookFromContract = async (bookId, quanity) => {
     try {
-        // Create a random wallet
-        const wallet = ethers.Wallet.createRandom();
-        console.log("Wallet Address:", wallet.address);
-        console.log("Private Key:", wallet.privateKey);
-    } catch (error) {
-        console.log(error);
-        throw error;
+
+        const book = await contractOnETH.getBooks(_bookId)
+        // get the total price of the book
+        const price = ethers.parseEther(book[2]).toString()
+        const totalPrice = price * quanity
+
+        // buying book
+        const txResponse = await contractOnETH.buyBook(bookId, quanity, { value: totalPrice})
+        console.log(txResponse.hash)
+        console.log(`https://sepolia.etherscan.io/tx/${txResponse.hash}`)
+        } catch (error) {
+            console.error(error)
     }
-};
-
-
-
-// 0x7590AC5189C76ab75c88AE95843aF4D5398854ec
-
+        
+} 
 
 
 
 (async () => {
-    await createEthereumAccount()
-    await addBookToContract(3, "Harry Potter", "J.K. Rowling", 10, 100)
-    await getBook()
+    await addBookToContract(bookDetails.bookId, bookDetails.title, bookDetails.author, bookDetails.price, bookDetails.stock)
+    await getBook(_bookId)
+    await buyBookFromContract(_bookId, 1)
 })()
