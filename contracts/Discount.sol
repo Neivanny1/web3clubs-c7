@@ -31,10 +31,7 @@ contract Discount is Ownable {
     }
 
     // Gets the discounted price for a book based on user points
-    function getDiscountedPrice(uint256 _bookId, address _user)
-        public
-        view
-        returns (uint256)
+    function getDiscountedPrice(uint256 _bookId, address _user) public view returns (uint256)
     {
         // Fetch the original price from the BookStore
         (, , uint256 originalPrice, , ) = bookStore.getBook(_bookId);
