@@ -1,28 +1,28 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "./BookStore.sol";
-import "./LoyaltyProgram.sol";
+import "contracts/AdvancedBookStore.sol";
+import "contracts/LoyaltyProgram.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 
 contract Discount is Ownable {
-    BookStore public bookStore;
+
+    /* VARIABLES ARE DECLARED HERE */
+    AdvancedBookStore public bookStore;
     LoyaltyProgram public loyaltyProgram;
 
+    /* CONSTRUCTORS ARE DECLARED HERE */
     // Initializes the contract with the owner, BookStore, and LoyaltyProgram addresses.
-    constructor(
-        address initialOwner,
-        address _bookStore,
-        address _loyaltyProgram
-    ) Ownable(initialOwner) {
-        bookStore = BookStore(_bookStore);
+    constructor(address initialOwner,address _bookStore,address _loyaltyProgram) Ownable(initialOwner) {
+        bookStore = AdvancedBookStore(_bookStore);
         loyaltyProgram = LoyaltyProgram(_loyaltyProgram);
     }
 
+    /* FUNCTIONS */
     // Sets the BookStore contract
     function setBookStore(address _bookStore) public onlyOwner {
-        bookStore = BookStore(_bookStore);
+        bookStore = AdvancedBookStore(_bookStore);
     }
 
     // Sets the LoyaltyProgram contract
